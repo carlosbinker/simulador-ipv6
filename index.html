@@ -104,6 +104,56 @@
         padding: 15px;
         overflow-y: auto;
         border-left: 4px solid var(--accent-color);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .arp-cache-section {
+        border: 2px solid #2ecc71;
+        border-radius: 8px;
+        padding: 12px;
+        background: rgba(46, 204, 113, 0.05);
+      }
+
+      .arp-cache-section h3 {
+        margin: 0 0 10px 0;
+        color: #2ecc71;
+        font-size: 0.95rem;
+      }
+
+      .arp-card {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid #3498db;
+        border-radius: 6px;
+        padding: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+      }
+
+      .arp-card-title {
+        color: #3498db;
+        font-weight: bold;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #3498db;
+        padding-bottom: 4px;
+      }
+
+      .arp-entry {
+        color: #ccc;
+        padding: 3px 0;
+        font-size: 0.85rem;
+        line-height: 1.3;
+      }
+
+      .arp-entry.resolved {
+        color: #2ecc71;
+      }
+
+      .packets-container {
+        flex: 1;
+        overflow-y: auto;
       }
 
       .layer {
@@ -225,7 +275,24 @@
       </div>
 
       <div id="packet-inspector">
-        <div style="color: #666; font-style: italic">Esperando tráfico...</div>
+        <div class="arp-cache-section">
+          <h3>📋 ARP Cache (Neighbor Discovery)</h3>
+          <div class="arp-card">
+            <div class="arp-card-title">PC-A (00:AA:00:22:00:0A)</div>
+            <div id="arp-PCA" class="arp-entry">Sin entradas resueltas</div>
+          </div>
+          <div class="arp-card">
+            <div class="arp-card-title">PC-B (00:AA:00:33:00:0B)</div>
+            <div id="arp-PCB" class="arp-entry">Sin entradas resueltas</div>
+          </div>
+          <div class="arp-card">
+            <div class="arp-card-title">PC-C (00:AA:00:44:00:0C)</div>
+            <div id="arp-PCC" class="arp-entry">Sin entradas resueltas</div>
+          </div>
+        </div>
+        <div class="packets-container">
+          <div style="color: #666; font-style: italic">Esperando tráfico...</div>
+        </div>
       </div>
     </div>
 
@@ -260,7 +327,24 @@
     </div>
 
     <script>
-      const inspector = document.getElementById("packet-inspector");
+      const packetsContainer = document.querySelector('.packets-container');
+      const arpCache = { PCA: [], PCB: [], PCC: [] };
+
+      function updateARPDisplay() {
+        const displayArp = (pcId, entries) => {
+          const elem = document.getElementById(`arp-${pcId}`);
+          if (entries.length === 0) {
+            elem.innerHTML = 'Sin entradas resueltas';
+            elem.className = 'arp-entry';
+          } else {
+            elem.innerHTML = entries.map(e => `✓ ${e.ip}<br/><span style="color:#aaa">${e.mac}</span>`).join('<br/>');
+            elem.className = 'arp-entry resolved';
+          }
+        };
+        displayArp('PCA', arpCache.PCA);
+        displayArp('PCB', arpCache.PCB);
+        displayArp('PCC', arpCache.PCC);
+      }
 
       function addPacket(title, layers, isReply = false) {
         let html = `<div class="packet-block" style="${isReply ? "border-left: 4px solid #2ecc71;" : "border-left: 4px solid #3498db;"}">`;
@@ -273,11 +357,11 @@
           html += `</div>`;
         });
         html += `</div>`;
-        inspector.innerHTML = html + inspector.innerHTML;
+        packetsContainer.innerHTML = html + packetsContainer.innerHTML;
       }
 
       function simulateSLAAC() {
-        inspector.innerHTML = "";
+        packetsContainer.innerHTML = "";
         addPacket("Router Solicitation (PC-A)", [
           {
             name: "Ethernet II",
@@ -301,7 +385,9 @@
             const el = document.getElementById(node.id);
             el.innerText = node.ip;
             el.style.color = "#2ecc71";
+            arpCache[node.pcId] = [{ ip: "fe80::2aa:ff:fe11:1", mac: "00:AA:00:11:00:01 (R1)" }];
           });
+          updateARPDisplay();
 
           addPacket(
             "Router Advertisement (R1)",
@@ -332,7 +418,7 @@
       }
 
       function runDAD(nodeId, mac, targetIp, snmAddr) {
-        inspector.innerHTML = "";
+        packetsContainer.innerHTML = "";
         addPacket(`DAD (Duplicate Address Detection) - PC-${nodeId}`, [
           {
             name: "Ethernet II",
@@ -361,7 +447,7 @@
 
         if (guaA === "::") return alert("Primero ejecutá SLAAC");
 
-        inspector.innerHTML = "";
+        packetsContainer.innerHTML = "";
 
         // 1. Neighbor Solicitation (Resolución de MAC)
         addPacket("Neighbor Solicitation (PC-A busca a PC-B)", [
@@ -384,6 +470,9 @@
 
         // 2. Neighbor Advertisement (Respuesta de B)
         setTimeout(() => {
+          arpCache.PCA.push({ ip: guaB, mac: "00:AA:00:33:00:0B (PC-B)" });
+          arpCache.PCB.push({ ip: guaA, mac: "00:AA:00:22:00:0A (PC-A)" });
+          updateARPDisplay();
           addPacket(
             "Neighbor Advertisement (PC-B responde)",
             [
@@ -413,7 +502,11 @@
           el.innerText = "::";
           el.style.color = "#aaa";
         });
-        inspector.innerHTML = "Reiniciado.";
+        arpCache.PCA = [];
+        arpCache.PCB = [];
+        arpCache.PCC = [];
+        updateARPDisplay();
+        packetsContainer.innerHTML = "<div style=\"color: #666; font-style: italic\">Reiniciado.</div>";
       }
     </script>
   </body>

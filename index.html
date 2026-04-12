@@ -291,7 +291,9 @@
           </div>
         </div>
         <div class="packets-container">
-          <div style="color: #666; font-style: italic">Esperando tráfico...</div>
+          <div style="color: #666; font-style: italic">
+            Esperando tráfico...
+          </div>
         </div>
       </div>
     </div>
@@ -327,23 +329,27 @@
     </div>
 
     <script>
-      const packetsContainer = document.querySelector('.packets-container');
+      const packetsContainer = document.querySelector(".packets-container");
       const arpCache = { PCA: [], PCB: [], PCC: [] };
 
       function updateARPDisplay() {
         const displayArp = (pcId, entries) => {
           const elem = document.getElementById(`arp-${pcId}`);
           if (entries.length === 0) {
-            elem.innerHTML = 'Sin entradas resueltas';
-            elem.className = 'arp-entry';
+            elem.innerHTML = "Sin entradas resueltas";
+            elem.className = "arp-entry";
           } else {
-            elem.innerHTML = entries.map(e => `✓ ${e.ip}<br/><span style="color:#aaa">${e.mac}</span>`).join('<br/>');
-            elem.className = 'arp-entry resolved';
+            elem.innerHTML = entries
+              .map(
+                (e) => `✓ ${e.ip}<br/><span style="color:#aaa">${e.mac}</span>`,
+              )
+              .join("<br/>");
+            elem.className = "arp-entry resolved";
           }
         };
-        displayArp('PCA', arpCache.PCA);
-        displayArp('PCB', arpCache.PCB);
-        displayArp('PCC', arpCache.PCC);
+        displayArp("PCA", arpCache.PCA);
+        displayArp("PCB", arpCache.PCB);
+        displayArp("PCC", arpCache.PCC);
       }
 
       function addPacket(title, layers, isReply = false) {
@@ -385,7 +391,9 @@
             const el = document.getElementById(node.id);
             el.innerText = node.ip;
             el.style.color = "#2ecc71";
-            arpCache[node.pcId] = [{ ip: "fe80::2aa:ff:fe11:1", mac: "00:AA:00:11:00:01 (R1)" }];
+            arpCache[node.pcId] = [
+              { ip: "fe80::2aa:ff:fe11:1", mac: "00:AA:00:11:00:01 (R1)" },
+            ];
           });
           updateARPDisplay();
 
@@ -506,7 +514,8 @@
         arpCache.PCB = [];
         arpCache.PCC = [];
         updateARPDisplay();
-        packetsContainer.innerHTML = "<div style=\"color: #666; font-style: italic\">Reiniciado.</div>";
+        packetsContainer.innerHTML =
+          '<div style="color: #666; font-style: italic">Reiniciado.</div>';
       }
     </script>
   </body>

@@ -1,266 +1,407 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Simulador IPv6 - Cátedra de Redes</title>
     <style>
-        :root {
-            --bg-color: #1a1a1a;
-            --node-color: #2d5a88;
-            --router-color: #c0392b;
-            --text-color: #ffffff;
-            --accent-color: #f1c40f;
-            --bus-color: #555;
-        }
+      :root {
+        --bg-color: #1a1a1a;
+        --node-color: #2d5a88;
+        --router-color: #c0392b;
+        --text-color: #ffffff;
+        --accent-color: #f1c40f;
+        --bus-color: #555;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
 
-        h1 { text-align: center; font-size: 1.8rem; margin: 10px; color: var(--accent-color); }
+      h1 {
+        text-align: center;
+        font-size: 1.8rem;
+        margin: 10px;
+        color: var(--accent-color);
+      }
 
-        #canvas-container {
-            position: relative;
-            flex-grow: 1;
-            background: #222;
-            border-bottom: 2px solid #444;
-            display: flex;
-        }
+      #canvas-container {
+        position: relative;
+        flex-grow: 1;
+        background: #222;
+        border-bottom: 2px solid #444;
+        display: flex;
+      }
 
-        #vertical-bus {
-            position: absolute;
-            left: 60px;
-            top: 20px;
-            bottom: 20px;
-            width: 8px;
-            background-color: var(--bus-color);
-            border-radius: 4px;
-        }
+      #vertical-bus {
+        position: absolute;
+        left: 60px;
+        top: 20px;
+        bottom: 20px;
+        width: 8px;
+        background-color: var(--bus-color);
+        border-radius: 4px;
+      }
 
-        .node-connection {
-            position: absolute;
-            height: 2px;
-            background-color: var(--bus-color);
-        }
+      .node-connection {
+        position: absolute;
+        height: 2px;
+        background-color: var(--bus-color);
+      }
 
-        .node {
-            position: absolute;
-            width: 85px;
-            height: 85px;
-            background: var(--node-color);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            z-index: 10;
-            left: 110px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
+      .node {
+        position: absolute;
+        width: 85px;
+        height: 85px;
+        background: var(--node-color);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        z-index: 10;
+        left: 110px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      }
 
-        .router { background: var(--router-color); border-radius: 50%; }
+      .router {
+        background: var(--router-color);
+        border-radius: 50%;
+      }
 
-        .node-info {
-            position: absolute;
-            left: 100px;
-            top: 0;
-            white-space: nowrap;
-            font-family: 'Courier New', monospace;
-            font-size: 1.05rem;
-            background: rgba(0,0,0,0.85);
-            padding: 6px 12px;
-            border-left: 4px solid var(--accent-color);
-            line-height: 1.4;
-        }
+      .node-info {
+        position: absolute;
+        left: 280px;
+        top: 0;
+        white-space: nowrap;
+        font-family: "Courier New", monospace;
+        font-size: 1.05rem;
+        background: rgba(0, 0, 0, 0.85);
+        padding: 6px 12px;
+        border-left: 4px solid var(--accent-color);
+        line-height: 1.4;
+      }
 
-        #packet-inspector {
-            height: 300px;
-            background: #000;
-            padding: 15px;
-            overflow-y: auto;
-            border-top: 4px solid var(--accent-color);
-        }
+      #packet-inspector {
+        height: 300px;
+        background: #000;
+        padding: 15px;
+        overflow-y: auto;
+        border-top: 4px solid var(--accent-color);
+      }
 
-        .layer { margin-bottom: 8px; border-left: 3px solid #555; padding-left: 15px; }
-        .layer-title { color: var(--accent-color); font-weight: bold; }
-        .packet-block { border: 1px dashed #444; padding: 10px; margin-bottom: 20px; background: #0a0a0a; }
-        .field { font-size: 0.95rem; color: #ccc; }
-        .field span { color: #fff; font-weight: bold; }
+      .layer {
+        margin-bottom: 8px;
+        border-left: 3px solid #555;
+        padding-left: 15px;
+      }
+      .layer-title {
+        color: var(--accent-color);
+        font-weight: bold;
+      }
+      .packet-block {
+        border: 1px dashed #444;
+        padding: 10px;
+        margin-bottom: 20px;
+        background: #0a0a0a;
+      }
+      .field {
+        font-size: 0.95rem;
+        color: #ccc;
+      }
+      .field span {
+        color: #fff;
+        font-weight: bold;
+      }
 
-        .controls {
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            background: #333;
-            flex-wrap: wrap;
-        }
+      .controls {
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        background: #333;
+        flex-wrap: wrap;
+      }
 
-        button {
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            background: #444;
-            color: white;
-            border: 1px solid #666;
-            border-radius: 4px;
-        }
+      button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        background: #444;
+        color: white;
+        border: 1px solid #666;
+        border-radius: 4px;
+      }
 
-        button:hover { background: var(--node-color); border-color: var(--accent-color); }
-        .btn-dad { border-color: #3498db; color: #3498db; }
-        .btn-reset { background: #c0392b; border-color: #ff4d4d; }
+      button:hover {
+        background: var(--node-color);
+        border-color: var(--accent-color);
+      }
+      .btn-dad {
+        border-color: #3498db;
+        color: #3498db;
+      }
+      .btn-reset {
+        background: #c0392b;
+        border-color: #ff4d4d;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <h1>Simulador IPv6: Procesos SLAAC, DAD y NDP</h1>
 
     <div id="canvas-container">
-        <div id="vertical-bus"></div>
-        
-        <div class="node-connection" style="top: 55px; left: 68px; width: 42px;"></div>
-        <div class="node router" style="top: 15px;">R1
-            <div class="node-info">
-                <strong>MAC: 00:AA:00:11:00:01</strong><br>
-                LLA: fe80::2aa:ff:fe11:1<br>
-                <span style="color:var(--accent-color)">Prefix: 2001:db8:a::/64</span>
-            </div>
-        </div>
+      <div id="vertical-bus"></div>
 
-        <div class="node-connection" style="top: 145px; left: 68px; width: 42px;"></div>
-        <div class="node" style="top: 105px;">PC-A
-            <div class="node-info">
-                <strong>MAC: 00:AA:00:22:00:0A</strong><br>
-                GUA: <span id="gua-PCA" style="color:#aaa">::</span>
-            </div>
+      <div
+        class="node-connection"
+        style="top: 55px; left: 68px; width: 42px"
+      ></div>
+      <div class="node router" style="top: 15px">
+        R1
+        <div class="node-info">
+          <strong>MAC: 00:AA:00:11:00:01</strong><br />
+          LLA: fe80::2aa:ff:fe11:1<br />
+          <span style="color: var(--accent-color)"
+            >Prefix: 2001:db8:a::/64</span
+          >
         </div>
+      </div>
 
-        <div class="node-connection" style="top: 235px; left: 68px; width: 42px;"></div>
-        <div class="node" style="top: 195px;">PC-B
-            <div class="node-info">
-                <strong>MAC: 00:AA:00:33:00:0B</strong><br>
-                GUA: <span id="gua-PCB" style="color:#aaa">::</span>
-            </div>
+      <div
+        class="node-connection"
+        style="top: 145px; left: 68px; width: 42px"
+      ></div>
+      <div class="node" style="top: 105px">
+        PC-A
+        <div class="node-info">
+          <strong>MAC: 00:AA:00:22:00:0A</strong><br />
+          GUA: <span id="gua-PCA" style="color: #aaa">::</span>
         </div>
+      </div>
 
-        <div class="node-connection" style="top: 325px; left: 68px; width: 42px;"></div>
-        <div class="node" style="top: 285px;">PC-C
-            <div class="node-info">
-                <strong>MAC: 00:AA:00:44:00:0C</strong><br>
-                GUA: <span id="gua-PCC" style="color:#aaa">::</span>
-            </div>
+      <div
+        class="node-connection"
+        style="top: 235px; left: 68px; width: 42px"
+      ></div>
+      <div class="node" style="top: 195px">
+        PC-B
+        <div class="node-info">
+          <strong>MAC: 00:AA:00:33:00:0B</strong><br />
+          GUA: <span id="gua-PCB" style="color: #aaa">::</span>
         </div>
+      </div>
+
+      <div
+        class="node-connection"
+        style="top: 325px; left: 68px; width: 42px"
+      ></div>
+      <div class="node" style="top: 285px">
+        PC-C
+        <div class="node-info">
+          <strong>MAC: 00:AA:00:44:00:0C</strong><br />
+          GUA: <span id="gua-PCC" style="color: #aaa">::</span>
+        </div>
+      </div>
     </div>
 
     <div class="controls">
-        <button onclick="simulateSLAAC()">1. SLAAC (RS + RA Multicast)</button>
-        <button class="btn-dad" onclick="runDAD('A', '22:00:0A', 'fe80::2aa:ff:fe22:a', 'ff02::1:ff22:a')">DAD PC-A</button>
-        <button class="btn-dad" onclick="runDAD('B', '33:00:0B', 'fe80::2aa:ff:fe33:b', 'ff02::1:ff33:b')">DAD PC-B</button>
-        <button class="btn-dad" onclick="runDAD('C', '44:00:0C', 'fe80::2aa:ff:fe44:c', 'ff02::1:ff44:c')">DAD PC-C</button>
-        <button onclick="simulateNDP()">2. NDP (A busca MAC de B)</button>
-        <button class="btn-reset" onclick="resetSimulation()">Reiniciar</button>
+      <button onclick="simulateSLAAC()">1. SLAAC (RS + RA Multicast)</button>
+      <button
+        class="btn-dad"
+        onclick="
+          runDAD('A', '22:00:0A', 'fe80::2aa:ff:fe22:a', 'ff02::1:ff22:a')
+        "
+      >
+        DAD PC-A
+      </button>
+      <button
+        class="btn-dad"
+        onclick="
+          runDAD('B', '33:00:0B', 'fe80::2aa:ff:fe33:b', 'ff02::1:ff33:b')
+        "
+      >
+        DAD PC-B
+      </button>
+      <button
+        class="btn-dad"
+        onclick="
+          runDAD('C', '44:00:0C', 'fe80::2aa:ff:fe44:c', 'ff02::1:ff44:c')
+        "
+      >
+        DAD PC-C
+      </button>
+      <button onclick="simulateNDP()">2. NDP (A busca MAC de B)</button>
+      <button class="btn-reset" onclick="resetSimulation()">Reiniciar</button>
     </div>
 
     <div id="packet-inspector">
-        <div style="color: #666; font-style: italic;">Esperando tráfico...</div>
+      <div style="color: #666; font-style: italic">Esperando tráfico...</div>
     </div>
 
-<script>
-    const inspector = document.getElementById('packet-inspector');
-    
-    function addPacket(title, layers, isReply = false) {
-        let html = `<div class="packet-block" style="${isReply ? 'border-left: 4px solid #2ecc71;' : 'border-left: 4px solid #3498db;'}">`;
-        html += `<h4 style="color:${isReply ? '#2ecc71' : '#3498db'}; margin:0 0 10px 0;">${isReply ? 'CAPTURADO: REPLY' : 'CAPTURADO: REQUEST'} - ${title}</h4>`;
-        layers.forEach(layer => {
-            html += `<div class="layer"><div class="layer-title">${layer.name}</div>`;
-            for (let f in layer.data) { html += `<div class="field">${f}: <span>${layer.data[f]}</span></div>`; }
-            html += `</div>`;
+    <script>
+      const inspector = document.getElementById("packet-inspector");
+
+      function addPacket(title, layers, isReply = false) {
+        let html = `<div class="packet-block" style="${isReply ? "border-left: 4px solid #2ecc71;" : "border-left: 4px solid #3498db;"}">`;
+        html += `<h4 style="color:${isReply ? "#2ecc71" : "#3498db"}; margin:0 0 10px 0;">${isReply ? "CAPTURADO: REPLY" : "CAPTURADO: REQUEST"} - ${title}</h4>`;
+        layers.forEach((layer) => {
+          html += `<div class="layer"><div class="layer-title">${layer.name}</div>`;
+          for (let f in layer.data) {
+            html += `<div class="field">${f}: <span>${layer.data[f]}</span></div>`;
+          }
+          html += `</div>`;
         });
         html += `</div>`;
         inspector.innerHTML = html + inspector.innerHTML;
-    }
+      }
 
-    function simulateSLAAC() {
+      function simulateSLAAC() {
         inspector.innerHTML = "";
         addPacket("Router Solicitation (PC-A)", [
-            { name: "Ethernet II", data: { "Src": "00:AA:00:22:00:0A", "Dst": "33:33:00:00:00:02" } },
-            { name: "IPv6 Header", data: { "Src": "fe80::2aa:ff:fe22:a", "Dst": "ff02::2 (All Routers)" } },
-            { name: "ICMPv6 (Type 133)", data: { "Type": "RS" } }
+          {
+            name: "Ethernet II",
+            data: { Src: "00:AA:00:22:00:0A", Dst: "33:33:00:00:00:02" },
+          },
+          {
+            name: "IPv6 Header",
+            data: { Src: "fe80::2aa:ff:fe22:a", Dst: "ff02::2 (All Routers)" },
+          },
+          { name: "ICMPv6 (Type 133)", data: { Type: "RS" } },
         ]);
 
         setTimeout(() => {
-            const nodes = [
-                { id: 'gua-PCA', ip: '2001:db8:a:0:2aa:ff:fe22:a' },
-                { id: 'gua-PCB', ip: '2001:db8:a:0:2aa:ff:fe33:b' },
-                { id: 'gua-PCC', ip: '2001:db8:a:0:2aa:ff:fe44:c' }
-            ];
+          const nodes = [
+            { id: "gua-PCA", ip: "2001:db8:a:0:2aa:ff:fe22:a" },
+            { id: "gua-PCB", ip: "2001:db8:a:0:2aa:ff:fe33:b" },
+            { id: "gua-PCC", ip: "2001:db8:a:0:2aa:ff:fe44:c" },
+          ];
 
-            nodes.forEach(node => {
-                const el = document.getElementById(node.id);
-                el.innerText = node.ip;
-                el.style.color = "#2ecc71";
-            });
+          nodes.forEach((node) => {
+            const el = document.getElementById(node.id);
+            el.innerText = node.ip;
+            el.style.color = "#2ecc71";
+          });
 
-            addPacket("Router Advertisement (R1)", [
-                { name: "Ethernet II", data: { "Src": "00:AA:00:11:00:01", "Dst": "33:33:00:00:00:01" } },
-                { name: "IPv6 Header", data: { "Src": "fe80::2aa:ff:fe11:1", "Dst": "ff02::1 (All Nodes)" } },
-                { name: "ICMPv6 (Type 134)", data: { "Type": "RA", "Prefix": "2001:db8:a::/64", "M/O Flags": "0/0" } }
-            ], true);
+          addPacket(
+            "Router Advertisement (R1)",
+            [
+              {
+                name: "Ethernet II",
+                data: { Src: "00:AA:00:11:00:01", Dst: "33:33:00:00:00:01" },
+              },
+              {
+                name: "IPv6 Header",
+                data: {
+                  Src: "fe80::2aa:ff:fe11:1",
+                  Dst: "ff02::1 (All Nodes)",
+                },
+              },
+              {
+                name: "ICMPv6 (Type 134)",
+                data: {
+                  Type: "RA",
+                  Prefix: "2001:db8:a::/64",
+                  "M/O Flags": "0/0",
+                },
+              },
+            ],
+            true,
+          );
         }, 800);
-    }
+      }
 
-    function runDAD(nodeId, mac, targetIp, snmAddr) {
+      function runDAD(nodeId, mac, targetIp, snmAddr) {
         inspector.innerHTML = "";
         addPacket(`DAD (Duplicate Address Detection) - PC-${nodeId}`, [
-            { name: "Ethernet II", data: { "Src": `00:AA:00:${mac}`, "Dst": `33:33:ff:${mac.split(':').slice(-2).join(':').toLowerCase()}` } },
-            { name: "IPv6 Header", data: { "Src": ":: (Unspecified)", "Dst": `${snmAddr} (Solicited-Node Multicast)` } },
-            { name: "ICMPv6 (Type 135)", data: { "Target": targetIp, "Info": "NS for DAD" } }
+          {
+            name: "Ethernet II",
+            data: {
+              Src: `00:AA:00:${mac}`,
+              Dst: `33:33:ff:${mac.split(":").slice(-2).join(":").toLowerCase()}`,
+            },
+          },
+          {
+            name: "IPv6 Header",
+            data: {
+              Src: ":: (Unspecified)",
+              Dst: `${snmAddr} (Solicited-Node Multicast)`,
+            },
+          },
+          {
+            name: "ICMPv6 (Type 135)",
+            data: { Target: targetIp, Info: "NS for DAD" },
+          },
         ]);
-    }
+      }
 
-    function simulateNDP() {
-        const guaA = document.getElementById('gua-PCA').innerText;
-        const guaB = document.getElementById('gua-PCB').innerText;
+      function simulateNDP() {
+        const guaA = document.getElementById("gua-PCA").innerText;
+        const guaB = document.getElementById("gua-PCB").innerText;
 
-        if(guaA === "::") return alert("Primero ejecutá SLAAC");
-        
+        if (guaA === "::") return alert("Primero ejecutá SLAAC");
+
         inspector.innerHTML = "";
-        
+
         // 1. Neighbor Solicitation (Resolución de MAC)
         addPacket("Neighbor Solicitation (PC-A busca a PC-B)", [
-            { name: "Ethernet II", data: { "Src": "00:AA:00:22:00:0A", "Dst": "33:33:ff:33:00:0b (SNM de B)" } },
-            { name: "IPv6 Header", data: { "Src": guaA, "Dst": "ff02::1:ff33:b" } },
-            { name: "ICMPv6 (Type 135)", data: { 
-                "Target": guaB, 
-                "Option (SLLA)": "00:AA:00:22:00:0A (MAC de A)" 
-            } }
+          {
+            name: "Ethernet II",
+            data: {
+              Src: "00:AA:00:22:00:0A",
+              Dst: "33:33:ff:33:00:0b (SNM de B)",
+            },
+          },
+          { name: "IPv6 Header", data: { Src: guaA, Dst: "ff02::1:ff33:b" } },
+          {
+            name: "ICMPv6 (Type 135)",
+            data: {
+              Target: guaB,
+              "Option (SLLA)": "00:AA:00:22:00:0A (MAC de A)",
+            },
+          },
         ]);
 
         // 2. Neighbor Advertisement (Respuesta de B)
         setTimeout(() => {
-            addPacket("Neighbor Advertisement (PC-B responde)", [
-                { name: "Ethernet II", data: { "Src": "00:AA:00:33:00:0B", "Dst": "00:AA:00:22:00:0A (Unicast)" } },
-                { name: "IPv6 Header", data: { "Src": guaB, "Dst": guaA } },
-                { name: "ICMPv6 (Type 136)", data: { 
-                    "Target": guaB, 
-                    "Option (TLLA)": "00:AA:00:33:00:0B (MAC de B)" 
-                } }
-            ], true);
+          addPacket(
+            "Neighbor Advertisement (PC-B responde)",
+            [
+              {
+                name: "Ethernet II",
+                data: {
+                  Src: "00:AA:00:33:00:0B",
+                  Dst: "00:AA:00:22:00:0A (Unicast)",
+                },
+              },
+              { name: "IPv6 Header", data: { Src: guaB, Dst: guaA } },
+              {
+                name: "ICMPv6 (Type 136)",
+                data: {
+                  Target: guaB,
+                  "Option (TLLA)": "00:AA:00:33:00:0B (MAC de B)",
+                },
+              },
+            ],
+            true,
+          );
         }, 800);
-    }
+      }
 
-    function resetSimulation() {
-        document.querySelectorAll('[id^="gua-"]').forEach(el => { el.innerText = "::"; el.style.color = "#aaa"; });
+      function resetSimulation() {
+        document.querySelectorAll('[id^="gua-"]').forEach((el) => {
+          el.innerText = "::";
+          el.style.color = "#aaa";
+        });
         inspector.innerHTML = "Reiniciado.";
-    }
-</script>
-</body>
+      }
+    </script>
+  </body>
 </html>

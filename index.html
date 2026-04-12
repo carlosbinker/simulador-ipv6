@@ -18,8 +18,8 @@
         background-color: var(--bg-color);
         color: var(--text-color);
         margin: 0;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
         height: 100vh;
         overflow: hidden;
       }
@@ -31,11 +31,17 @@
         color: var(--accent-color);
       }
 
+      #main-content {
+        display: flex;
+        gap: 0;
+        overflow: hidden;
+      }
+
       #canvas-container {
         position: relative;
-        flex-grow: 1;
+        flex: 2;
         background: #222;
-        border-bottom: 2px solid #444;
+        border-right: 2px solid #444;
         display: flex;
       }
 
@@ -93,11 +99,11 @@
       }
 
       #packet-inspector {
-        height: 150px;
+        flex: 1;
         background: #000;
         padding: 15px;
         overflow-y: auto;
-        border-top: 4px solid var(--accent-color);
+        border-left: 4px solid var(--accent-color);
       }
 
       .layer {
@@ -162,58 +168,64 @@
   <body>
     <h1>Simulador IPv6: Procesos SLAAC, DAD y NDP</h1>
 
-    <div id="canvas-container">
-      <div id="vertical-bus"></div>
+    <div id="main-content">
+      <div id="canvas-container">
+        <div id="vertical-bus"></div>
 
-      <div
-        class="node-connection"
-        style="top: 55px; left: 68px; width: 42px"
-      ></div>
-      <div class="node router" style="top: 15px">
-        R1
-        <div class="node-info">
-          <strong>MAC: 00:AA:00:11:00:01</strong><br />
-          LLA: fe80::2aa:ff:fe11:1<br />
-          <span style="color: var(--accent-color)"
-            >Prefix: 2001:db8:a::/64</span
-          >
+        <div
+          class="node-connection"
+          style="top: 55px; left: 68px; width: 42px"
+        ></div>
+        <div class="node router" style="top: 15px">
+          R1
+          <div class="node-info">
+            <strong>MAC: 00:AA:00:11:00:01</strong><br />
+            LLA: fe80::2aa:ff:fe11:1<br />
+            <span style="color: var(--accent-color)"
+              >Prefix: 2001:db8:a::/64</span
+            >
+          </div>
+        </div>
+
+        <div
+          class="node-connection"
+          style="top: 145px; left: 68px; width: 42px"
+        ></div>
+        <div class="node" style="top: 105px">
+          PC-A
+          <div class="node-info">
+            <strong>MAC: 00:AA:00:22:00:0A</strong><br />
+            GUA: <span id="gua-PCA" style="color: #aaa">::</span>
+          </div>
+        </div>
+
+        <div
+          class="node-connection"
+          style="top: 235px; left: 68px; width: 42px"
+        ></div>
+        <div class="node" style="top: 195px">
+          PC-B
+          <div class="node-info">
+            <strong>MAC: 00:AA:00:33:00:0B</strong><br />
+            GUA: <span id="gua-PCB" style="color: #aaa">::</span>
+          </div>
+        </div>
+
+        <div
+          class="node-connection"
+          style="top: 325px; left: 68px; width: 42px"
+        ></div>
+        <div class="node" style="top: 285px">
+          PC-C
+          <div class="node-info">
+            <strong>MAC: 00:AA:00:44:00:0C</strong><br />
+            GUA: <span id="gua-PCC" style="color: #aaa">::</span>
+          </div>
         </div>
       </div>
 
-      <div
-        class="node-connection"
-        style="top: 145px; left: 68px; width: 42px"
-      ></div>
-      <div class="node" style="top: 105px">
-        PC-A
-        <div class="node-info">
-          <strong>MAC: 00:AA:00:22:00:0A</strong><br />
-          GUA: <span id="gua-PCA" style="color: #aaa">::</span>
-        </div>
-      </div>
-
-      <div
-        class="node-connection"
-        style="top: 235px; left: 68px; width: 42px"
-      ></div>
-      <div class="node" style="top: 195px">
-        PC-B
-        <div class="node-info">
-          <strong>MAC: 00:AA:00:33:00:0B</strong><br />
-          GUA: <span id="gua-PCB" style="color: #aaa">::</span>
-        </div>
-      </div>
-
-      <div
-        class="node-connection"
-        style="top: 325px; left: 68px; width: 42px"
-      ></div>
-      <div class="node" style="top: 285px">
-        PC-C
-        <div class="node-info">
-          <strong>MAC: 00:AA:00:44:00:0C</strong><br />
-          GUA: <span id="gua-PCC" style="color: #aaa">::</span>
-        </div>
+      <div id="packet-inspector">
+        <div style="color: #666; font-style: italic">Esperando tráfico...</div>
       </div>
     </div>
 
@@ -245,10 +257,6 @@
       </button>
       <button onclick="simulateNDP()">2. NDP (A busca MAC de B)</button>
       <button class="btn-reset" onclick="resetSimulation()">Reiniciar</button>
-    </div>
-
-    <div id="packet-inspector">
-      <div style="color: #666; font-style: italic">Esperando tráfico...</div>
     </div>
 
     <script>

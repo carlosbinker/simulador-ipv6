@@ -69,6 +69,7 @@
         z-index: 10;
         left: 110px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        flex-direction: column;
       }
 
       .router {
@@ -78,15 +79,17 @@
 
       .node-info {
         position: absolute;
-        left: 280px;
-        top: 0;
+        left: 100%;
+        top: -10px;
+        margin-left: 15px;
         white-space: nowrap;
         font-family: "Courier New", monospace;
-        font-size: 1.05rem;
-        background: rgba(0, 0, 0, 0.85);
+        font-size: 0.95rem;
+        background: rgba(0, 0, 0, 0.9);
         padding: 6px 12px;
         border-left: 4px solid var(--accent-color);
         line-height: 1.4;
+        z-index: 5;
       }
 
       #packet-inspector {

@@ -245,6 +245,7 @@
           PC-A
           <div class="node-info">
             <strong>MAC: 00:AA:00:22:00:0A</strong><br />
+            LLA: <span id="lla-PCA" style="color: #aaa">::</span><br />
             GUA: <span id="gua-PCA" style="color: #aaa">::</span>
           </div>
         </div>
@@ -257,6 +258,7 @@
           PC-B
           <div class="node-info">
             <strong>MAC: 00:AA:00:33:00:0B</strong><br />
+            LLA: <span id="lla-PCB" style="color: #aaa">::</span><br />
             GUA: <span id="gua-PCB" style="color: #aaa">::</span>
           </div>
         </div>
@@ -269,6 +271,7 @@
           PC-C
           <div class="node-info">
             <strong>MAC: 00:AA:00:44:00:0C</strong><br />
+            LLA: <span id="lla-PCC" style="color: #aaa">::</span><br />
             GUA: <span id="gua-PCC" style="color: #aaa">::</span>
           </div>
         </div>
@@ -463,6 +466,18 @@
             data: { Target: targetIp, Info: "NS for DAD" },
           },
         ]);
+
+        // Show Link Local Address on the node
+        const llaElements = {
+          A: document.getElementById("lla-PCA"),
+          B: document.getElementById("lla-PCB"),
+          C: document.getElementById("lla-PCC"),
+        };
+
+        if (llaElements[nodeId]) {
+          llaElements[nodeId].innerText = targetIp;
+          llaElements[nodeId].style.color = "#2ecc71";
+        }
       }
 
       function simulateNDP_AB() {
@@ -628,10 +643,12 @@
       }
 
       function resetSimulation() {
-        document.querySelectorAll('[id^="gua-"]').forEach((el) => {
-          el.innerText = "::";
-          el.style.color = "#aaa";
-        });
+        document
+          .querySelectorAll('[id^="gua-"], [id^="lla-"]')
+          .forEach((el) => {
+            el.innerText = "::";
+            el.style.color = "#aaa";
+          });
         arpCache.PCA = [];
         arpCache.PCB = [];
         arpCache.PCC = [];

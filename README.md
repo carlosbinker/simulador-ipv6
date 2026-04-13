@@ -10,22 +10,39 @@ Simulador interactivo para la **Cátedra de Redes** que permite visualizar y ent
 
 ## ✨ Funcionalidades
 
-- 🎯 **Simulación de SLAAC**: Visualiza cómo los dispositivos obtienen direcciones IPv6 a través de Router Solicitation (RS) y Router Advertisement (RA)
-- 🔍 **Evaluación DAD**: Verifica que no existan direcciones duplicadas antes de adoptar una dirección IPv6
-- 📡 **Resolución NDP**: Simula la búsqueda de direcciones MAC entre dispositivos usando Neighbor Solicitation (NS) y Neighbor Advertisement (NA)
-- 📊 **Inspector de Paquetes**: Captura y visualiza en tiempo real los detalles de cada capa de protocolo
-- 🎨 **Interfaz visual**: Representación gráfica de la topología de red con bus vertical
+- 🎯 **Simulación de SLAAC múltiple**: Visualiza cómo cada PC obtiene direcciones IPv6 iniciando el proceso desde diferente fuente (RS desde A, B o C)
+- 🔍 **Evaluación DAD dinámica**: Verifica que no existan direcciones duplicadas y genera Link-Local Addresses (LLA) para cada PC
+- 📡 **Resolución NDP multi-flujo**: Simula 3 flujos diferentes de búsqueda de direcciones MAC: A→B, A→C, B→C
+- 📊 **Inspector de Paquetes**: Captura y visualiza en tiempo real los detalles de cada capa de protocolo (Ethernet, IPv6, ICMPv6)
+- 🎨 **Interfaz visual mejorada**: Representación gráfica de la topología de red con display de MACs, LLAs y GUAs en cada nodo
+- 💾 **Neighbor Cache visual**: Panel derecho que muestra el estado del cache de descubrimiento de vecinos para cada PC
 
 ## 🏃 Uso
 
 1. Abre `index.html` en tu navegador web
 2. Usa los botones de control para ejecutar cada simulación:
-   - **1. SLAAC**: Inicia la autoconfiguración de direcciones IPv6
-   - **DAD PC-A/B/C**: Ejecuta la detección de direcciones duplicadas para cada PC
-   - **2. NDP**: Simula la resolución de direcciones (PC-A busca a PC-B)
+   
+   **SLAAC** (3 opciones - una por cada PC):
+   - **SLAAC (RS de A)**: Autoconfiguración iniciada por PC-A
+   - **SLAAC (RS de B)**: Autoconfiguración iniciada por PC-B
+   - **SLAAC (RS de C)**: Autoconfiguración iniciada por PC-C
+   
+   **DAD** (3 opciones - verificación por PC):
+   - **DAD PC-A**: Detección de dirección duplicada para PC-A (genera LLA)
+   - **DAD PC-B**: Detección de dirección duplicada para PC-B (genera LLA)
+   - **DAD PC-C**: Detección de dirección duplicada para PC-C (genera LLA)
+   
+   **NDP** (3 flujos de resolución):
+   - **NDP A→B**: PC-A busca MAC de PC-B
+   - **NDP A→C**: PC-A busca MAC de PC-C
+   - **NDP B→C**: PC-B busca MAC de PC-C
+   
    - **Reiniciar**: Limpia la simulación
 
-3. Observa los paquetes capturados en el inspector inferior
+3. Observa:
+   - Las direcciones Link-Local (LLA) que aparecen cuando ejecutas DAD
+   - Los paquetes capturados en el inspector
+   - El cache de vecinos en el panel derecho
 
 ## 🔧 Tecnologías
 
@@ -81,11 +98,13 @@ Simulador interactivo para la **Cátedra de Redes** que permite visualizar y ent
 
 ## 💡 Cómo Usar para Aprender
 
-1. **Paso 1**: Ejecuta el botón "SLAAC" para ver cómo se distribuyen las direcciones IPv6
-2. **Paso 2**: Observa en el inspector los paquetes RS y RA intercambiados
-3. **Paso 3**: Prueba los botones DAD para ver cómo se verifica cada dirección
-4. **Paso 4**: Usa NDP para entender cómo se resuelven las direcciones MAC entre los dispositivos
-5. **Paso 5**: Reinicia y repite para consolidar los conceptos
+1. **Paso 1**: Ejecuta cualquiera de los botones "SLAAC" para ver cómo se distribuyen las direcciones IPv6 a todos los PC
+2. **Paso 2**: Observa en el inspector los paquetes RS (Solicitud) y RA (Respuesta) intercambiados
+3. **Paso 3**: Ejecuta los botones DAD (PC-A, PC-B, PC-C) para ver cómo se generan las Link-Local Addresses (LLA)
+4. **Paso 4**: Verifica que las LLA aparezcan en cada nodo después de ejecutar DAD
+5. **Paso 5**: Usa cualquiera de los botones NDP para entender cómo se resuelven las direcciones MAC entre dispositivos
+6. **Paso 6**: Observa el panel "ARP Cache (Neighbor Discovery)" cómo se llena con las resoluciones
+7. **Paso 7**: Reinicia y repite para consolidar los conceptos
 
 ## 🌍 Direcciones en Hexadecimal
 

@@ -456,7 +456,7 @@
 
       function runDAD(nodeId, mac, targetIp, snmAddr) {
         packetsContainer.innerHTML = "";
-        addPacket(`DAD (Duplicate Address Detection) - PC-${nodeId}`, [
+        addPacket(`DAD - Neighbor Solicitation (PC-${nodeId})`, [
           {
             name: "Ethernet II",
             data: {
@@ -473,53 +473,46 @@
           },
           {
             name: "ICMPv6 (Type 135)",
-            data: { Target: targetIp, Info: "NS for DAD" },
+            data: { Target: targetIp, Parameter: "DAD - NS probe" },
           },
         ]);
 
-        // Show Link Local Address on the node
-        const llaElements = {
-          A: document.getElementById("lla-PCA"),
-          B: document.getElementById("lla-PCB"),
-          C: document.getElementById("lla-PCC"),
-        };
-
-        if (llaElements[nodeId]) {
-          llaElements[nodeId].innerText = targetIp;
-          llaElements[nodeId].style.color = "#2ecc71";
-        }
-
-        // Add Neighbor Advertisement response after delay
+        // Show Link Local Address on the node after delay
         setTimeout(() => {
+          const llaElements = {
+            A: document.getElementById("lla-PCA"),
+            B: document.getElementById("lla-PCB"),
+            C: document.getElementById("lla-PCC"),
+          };
+
+          if (llaElements[nodeId]) {
+            llaElements[nodeId].innerText = targetIp;
+            llaElements[nodeId].style.color = "#2ecc71";
+          }
+
+          // Show confirmation message
           addPacket(
-            `Neighbor Advertisement (PC-${nodeId} confirma dirección)`,
+            `✓ IPv6 Address Confirmed (PC-${nodeId})`,
             [
               {
-                name: "Ethernet II",
+                name: "Status",
                 data: {
-                  Src: `00:AA:00:${mac}`,
-                  Dst: "33:33:00:00:00:01 (Multicast - All Nodes)",
-                },
-              },
-              {
-                name: "IPv6 Header",
-                data: {
-                  Src: targetIp,
-                  Dst: "ff02::1 (All Nodes)",
-                },
-              },
-              {
-                name: "ICMPv6 (Type 136)",
-                data: {
-                  Target: targetIp,
-                  "Option (TLLA)": `00:AA:00:${mac}`,
-                  Flags: "R=0, S=1, O=0",
+                  "No Response": "No conflicting NA received",
+                  "Address Status": `${targetIp} is unique`,
+                  Action: "Link-Local Address accepted",
                 },
               },
             ],
             true,
           );
         }, 800);
+      }
+
+      function simulateNDP_AB() {
+        const guaA = document.getElementById("gua-PCA").innerText;
+        const guaB = document.getElementById("gua-PCB").innerText;
+
+        if (guaA === "::") return alert("Primero ejecutá SLAAC");
 
         packetsContainer.innerHTML = "";
 

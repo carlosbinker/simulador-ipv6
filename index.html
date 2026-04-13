@@ -302,6 +302,30 @@
       <button onclick="simulateSLAAC_A()">SLAAC (RS de A)</button>
       <button onclick="simulateSLAAC_B()">SLAAC (RS de B)</button>
       <button onclick="simulateSLAAC_C()">SLAAC (RS de C)</button>
+      <button
+        class="btn-dad"
+        onclick="
+          runDAD('A', '22:00:0A', 'fe80::2aa:ff:fe22:a', 'ff02::1:ff22:a')
+        "
+      >
+        DAD PC-A
+      </button>
+      <button
+        class="btn-dad"
+        onclick="
+          runDAD('B', '33:00:0B', 'fe80::2aa:ff:fe33:b', 'ff02::1:ff33:b')
+        "
+      >
+        DAD PC-B
+      </button>
+      <button
+        class="btn-dad"
+        onclick="
+          runDAD('C', '44:00:0C', 'fe80::2aa:ff:fe44:c', 'ff02::1:ff44:c')
+        "
+      >
+        DAD PC-C
+      </button>
       <button onclick="simulateNDP_AB()">NDP A→B</button>
       <button onclick="simulateNDP_AC()">NDP A→C</button>
       <button onclick="simulateNDP_BC()">NDP B→C</button>

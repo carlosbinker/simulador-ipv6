@@ -339,6 +339,16 @@
       const packetsContainer = document.querySelector(".packets-container");
       const arpCache = { PCA: [], PCB: [], PCC: [] };
 
+      function addOrUpdateCacheEntry(pcId, ip, mac) {
+        const cache = arpCache[pcId];
+        const existingIndex = cache.findIndex((e) => e.ip === ip);
+        if (existingIndex >= 0) {
+          cache[existingIndex] = { ip, mac };
+        } else {
+          cache.push({ ip, mac });
+        }
+      }
+
       function updateARPDisplay() {
         const displayArp = (pcId, entries) => {
           const elem = document.getElementById(`arp-${pcId}`);
@@ -507,8 +517,8 @@
         ]);
 
         setTimeout(() => {
-          arpCache.PCA.push({ ip: guaB, mac: "00:AA:00:33:00:0B (PC-B)" });
-          arpCache.PCB.push({ ip: guaA, mac: "00:AA:00:22:00:0A (PC-A)" });
+          addOrUpdateCacheEntry("PCA", guaB, "00:AA:00:33:00:0B (PC-B)");
+          addOrUpdateCacheEntry("PCB", guaA, "00:AA:00:22:00:0A (PC-A)");
           updateARPDisplay();
           addPacket(
             "Neighbor Advertisement (PC-B responde)",
@@ -561,8 +571,8 @@
         ]);
 
         setTimeout(() => {
-          arpCache.PCA.push({ ip: guaC, mac: "00:AA:00:44:00:0C (PC-C)" });
-          arpCache.PCC.push({ ip: guaA, mac: "00:AA:00:22:00:0A (PC-A)" });
+          addOrUpdateCacheEntry("PCA", guaC, "00:AA:00:44:00:0C (PC-C)");
+          addOrUpdateCacheEntry("PCC", guaA, "00:AA:00:22:00:0A (PC-A)");
           updateARPDisplay();
           addPacket(
             "Neighbor Advertisement (PC-C responde)",
@@ -615,8 +625,8 @@
         ]);
 
         setTimeout(() => {
-          arpCache.PCB.push({ ip: guaC, mac: "00:AA:00:44:00:0C (PC-C)" });
-          arpCache.PCC.push({ ip: guaB, mac: "00:AA:00:33:00:0B (PC-B)" });
+          addOrUpdateCacheEntry("PCB", guaC, "00:AA:00:44:00:0C (PC-C)");
+          addOrUpdateCacheEntry("PCC", guaB, "00:AA:00:33:00:0B (PC-B)");
           updateARPDisplay();
           addPacket(
             "Neighbor Advertisement (PC-C responde)",

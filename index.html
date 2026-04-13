@@ -461,7 +461,7 @@
             name: "Ethernet II",
             data: {
               Src: `00:AA:00:${mac}`,
-              Dst: `33:33:ff:${mac.split(":").slice(-2).join(":").toLowerCase()}`,
+              Dst: `33:33:ff:${mac.toLowerCase()}`,
             },
           },
           {
@@ -488,13 +488,38 @@
           llaElements[nodeId].innerText = targetIp;
           llaElements[nodeId].style.color = "#2ecc71";
         }
-      }
 
-      function simulateNDP_AB() {
-        const guaA = document.getElementById("gua-PCA").innerText;
-        const guaB = document.getElementById("gua-PCB").innerText;
-
-        if (guaA === "::") return alert("Primero ejecutá SLAAC");
+        // Add Neighbor Advertisement response after delay
+        setTimeout(() => {
+          addPacket(
+            `Neighbor Advertisement (PC-${nodeId} confirma dirección)`,
+            [
+              {
+                name: "Ethernet II",
+                data: {
+                  Src: `00:AA:00:${mac}`,
+                  Dst: "ff:ff:ff:ff:ff:ff (Broadcast)",
+                },
+              },
+              {
+                name: "IPv6 Header",
+                data: {
+                  Src: targetIp,
+                  Dst: "ff02::1 (All Nodes)",
+                },
+              },
+              {
+                name: "ICMPv6 (Type 136)",
+                data: {
+                  Target: targetIp,
+                  "Option (TLLA)": `00:AA:00:${mac}`,
+                  Flags: "R=0, S=1, O=0",
+                },
+              },
+            ],
+            true,
+          );
+        }, 800);
 
         packetsContainer.innerHTML = "";
 

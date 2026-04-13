@@ -299,32 +299,12 @@
     </div>
 
     <div class="controls">
-      <button onclick="simulateSLAAC()">1. SLAAC (RS + RA Multicast)</button>
-      <button
-        class="btn-dad"
-        onclick="
-          runDAD('A', '22:00:0A', 'fe80::2aa:ff:fe22:a', 'ff02::1:ff22:a')
-        "
-      >
-        DAD PC-A
-      </button>
-      <button
-        class="btn-dad"
-        onclick="
-          runDAD('B', '33:00:0B', 'fe80::2aa:ff:fe33:b', 'ff02::1:ff33:b')
-        "
-      >
-        DAD PC-B
-      </button>
-      <button
-        class="btn-dad"
-        onclick="
-          runDAD('C', '44:00:0C', 'fe80::2aa:ff:fe44:c', 'ff02::1:ff44:c')
-        "
-      >
-        DAD PC-C
-      </button>
-      <button onclick="simulateNDP()">2. NDP (A busca MAC de B)</button>
+      <button onclick="simulateSLAAC_A()">SLAAC (RS de A)</button>
+      <button onclick="simulateSLAAC_B()">SLAAC (RS de B)</button>
+      <button onclick="simulateSLAAC_C()">SLAAC (RS de C)</button>
+      <button onclick="simulateNDP_AB()">NDP A→B</button>
+      <button onclick="simulateNDP_AC()">NDP A→C</button>
+      <button onclick="simulateNDP_BC()">NDP B→C</button>
       <button class="btn-reset" onclick="resetSimulation()">Reiniciar</button>
     </div>
 
@@ -366,16 +346,16 @@
         packetsContainer.innerHTML = html + packetsContainer.innerHTML;
       }
 
-      function simulateSLAAC() {
+      function executeSLAAC(sourcePc, sourceMac, sourceLLA) {
         packetsContainer.innerHTML = "";
-        addPacket("Router Solicitation (PC-A)", [
+        addPacket(`Router Solicitation (${sourcePc})`, [
           {
             name: "Ethernet II",
-            data: { Src: "00:AA:00:22:00:0A", Dst: "33:33:00:00:00:02" },
+            data: { Src: sourceMac, Dst: "33:33:00:00:00:02" },
           },
           {
             name: "IPv6 Header",
-            data: { Src: "fe80::2aa:ff:fe22:a", Dst: "ff02::2 (All Routers)" },
+            data: { Src: sourceLLA, Dst: "ff02::2 (All Routers)" },
           },
           { name: "ICMPv6 (Type 133)", data: { Type: "RS" } },
         ]);
@@ -425,6 +405,18 @@
         }, 800);
       }
 
+      function simulateSLAAC_A() {
+        executeSLAAC("PC-A", "00:AA:00:22:00:0A", "fe80::2aa:ff:fe22:a");
+      }
+
+      function simulateSLAAC_B() {
+        executeSLAAC("PC-B", "00:AA:00:33:00:0B", "fe80::2aa:ff:fe33:b");
+      }
+
+      function simulateSLAAC_C() {
+        executeSLAAC("PC-C", "00:AA:00:44:00:0C", "fe80::2aa:ff:fe44:c");
+      }
+
       function runDAD(nodeId, mac, targetIp, snmAddr) {
         packetsContainer.innerHTML = "";
         addPacket(`DAD (Duplicate Address Detection) - PC-${nodeId}`, [
@@ -449,7 +441,7 @@
         ]);
       }
 
-      function simulateNDP() {
+      function simulateNDP_AB() {
         const guaA = document.getElementById("gua-PCA").innerText;
         const guaB = document.getElementById("gua-PCB").innerText;
 
@@ -457,7 +449,6 @@
 
         packetsContainer.innerHTML = "";
 
-        // 1. Neighbor Solicitation (Resolución de MAC)
         addPacket("Neighbor Solicitation (PC-A busca a PC-B)", [
           {
             name: "Ethernet II",
@@ -476,7 +467,6 @@
           },
         ]);
 
-        // 2. Neighbor Advertisement (Respuesta de B)
         setTimeout(() => {
           arpCache.PCA.push({ ip: guaB, mac: "00:AA:00:33:00:0B (PC-B)" });
           arpCache.PCB.push({ ip: guaA, mac: "00:AA:00:22:00:0A (PC-A)" });
@@ -497,6 +487,114 @@
                 data: {
                   Target: guaB,
                   "Option (TLLA)": "00:AA:00:33:00:0B (MAC de B)",
+                },
+              },
+            ],
+            true,
+          );
+        }, 800);
+      }
+
+      function simulateNDP_AC() {
+        const guaA = document.getElementById("gua-PCA").innerText;
+        const guaC = document.getElementById("gua-PCC").innerText;
+
+        if (guaA === "::") return alert("Primero ejecutá SLAAC");
+
+        packetsContainer.innerHTML = "";
+
+        addPacket("Neighbor Solicitation (PC-A busca a PC-C)", [
+          {
+            name: "Ethernet II",
+            data: {
+              Src: "00:AA:00:22:00:0A",
+              Dst: "33:33:ff:44:00:0c (SNM de C)",
+            },
+          },
+          { name: "IPv6 Header", data: { Src: guaA, Dst: "ff02::1:ff44:c" } },
+          {
+            name: "ICMPv6 (Type 135)",
+            data: {
+              Target: guaC,
+              "Option (SLLA)": "00:AA:00:22:00:0A (MAC de A)",
+            },
+          },
+        ]);
+
+        setTimeout(() => {
+          arpCache.PCA.push({ ip: guaC, mac: "00:AA:00:44:00:0C (PC-C)" });
+          arpCache.PCC.push({ ip: guaA, mac: "00:AA:00:22:00:0A (PC-A)" });
+          updateARPDisplay();
+          addPacket(
+            "Neighbor Advertisement (PC-C responde)",
+            [
+              {
+                name: "Ethernet II",
+                data: {
+                  Src: "00:AA:00:44:00:0C",
+                  Dst: "00:AA:00:22:00:0A (Unicast)",
+                },
+              },
+              { name: "IPv6 Header", data: { Src: guaC, Dst: guaA } },
+              {
+                name: "ICMPv6 (Type 136)",
+                data: {
+                  Target: guaC,
+                  "Option (TLLA)": "00:AA:00:44:00:0C (MAC de C)",
+                },
+              },
+            ],
+            true,
+          );
+        }, 800);
+      }
+
+      function simulateNDP_BC() {
+        const guaB = document.getElementById("gua-PCB").innerText;
+        const guaC = document.getElementById("gua-PCC").innerText;
+
+        if (guaB === "::") return alert("Primero ejecutá SLAAC");
+
+        packetsContainer.innerHTML = "";
+
+        addPacket("Neighbor Solicitation (PC-B busca a PC-C)", [
+          {
+            name: "Ethernet II",
+            data: {
+              Src: "00:AA:00:33:00:0B",
+              Dst: "33:33:ff:44:00:0c (SNM de C)",
+            },
+          },
+          { name: "IPv6 Header", data: { Src: guaB, Dst: "ff02::1:ff44:c" } },
+          {
+            name: "ICMPv6 (Type 135)",
+            data: {
+              Target: guaC,
+              "Option (SLLA)": "00:AA:00:33:00:0B (MAC de B)",
+            },
+          },
+        ]);
+
+        setTimeout(() => {
+          arpCache.PCB.push({ ip: guaC, mac: "00:AA:00:44:00:0C (PC-C)" });
+          arpCache.PCC.push({ ip: guaB, mac: "00:AA:00:33:00:0B (PC-B)" });
+          updateARPDisplay();
+          addPacket(
+            "Neighbor Advertisement (PC-C responde)",
+            [
+              {
+                name: "Ethernet II",
+                data: {
+                  Src: "00:AA:00:44:00:0C",
+                  Dst: "00:AA:00:33:00:0B (Unicast)",
+                },
+              },
+              { name: "IPv6 Header", data: { Src: guaC, Dst: guaB } },
+              {
+                name: "ICMPv6 (Type 136)",
+                data: {
+                  Target: guaC,
+                  "Option (TLLA)": "00:AA:00:44:00:0C (MAC de C)",
                 },
               },
             ],
